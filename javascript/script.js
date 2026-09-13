@@ -66,6 +66,13 @@ function updateDiscordStatus(user) {
     const state =
         activity.state || "";
 
+    const youtubeSearchUrl =
+        activity.type === 3 && activity.name === "YouTube"
+            ? `https://www.youtube.com/results?search_query=${encodeURIComponent(
+                `"${details}" "${state}"`
+            )}`
+            : "";
+
     let imageUrl = "";
 
     /*
@@ -99,6 +106,17 @@ function updateDiscordStatus(user) {
 
         <div class="activity-content">
             ${
+                youtubeSearchUrl
+                    ? `<a
+                        href="${youtubeSearchUrl}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="activity-link"
+                    >`
+                    : ""
+            }
+
+            ${
                 imageUrl
                     ? `<img
                         class="activity-image"
@@ -124,6 +142,8 @@ function updateDiscordStatus(user) {
                         : ""
                 }
             </div>
+
+            ${youtubeSearchUrl ? `</a>` : ""}
         </div>
     `;
 }
@@ -189,63 +209,63 @@ function connectLanyard() {
     });
 }
 
-function setupVisitorCounter() {
-    const element =
-        document.getElementById("visitor-count");
+//function setupVisitorCounter() {
+//    const element =
+//        document.getElementById("visitor-count");
+//
+//    if (!element) {
+//        return;
+//    }
+//
+//    const key =
+//        "ihatenosebleedz-visitor-count";
+//
+//    const count =
+//        Number(localStorage.getItem(key) || 0) + 1;
+//
+//    localStorage.setItem(
+//        key,
+//        count
+//    );
+//
+//    element.textContent =
+//        String(count).padStart(6, "0");
+//}
 
-    if (!element) {
-        return;
-    }
+//function setupRandomQuote() {
+//    const button =
+//        document.getElementById("random-quote");
+//
+//    const output =
+//        document.getElementById("quote-output");
+//
+//    if (!button || !output) {
+//        return;
+//    }
+//
+//    const quotes = [
+//        "it works on my machine.",
+//        "i should probably document this.",
+//        "sudo make me a sandwich.",
+//        "why is it using 8gb of ram?",
+//        "it was the config file.",
+//        "one more linux project.",
+//        "i have absolutely no idea why this works.",
+//        "have you tried turning it off and on again?"
+//    ];
+//
+//    button.addEventListener("click", () => {
+//        output.textContent =
+//            quotes[
+//                Math.floor(
+//                    Math.random() * quotes.length
+//                )
+//            ];
+//    });
+//}
 
-    const key =
-        "ihatenosebleedz-visitor-count";
-
-    const count =
-        Number(localStorage.getItem(key) || 0) + 1;
-
-    localStorage.setItem(
-        key,
-        count
-    );
-
-    element.textContent =
-        String(count).padStart(6, "0");
-}
-
-function setupRandomQuote() {
-    const button =
-        document.getElementById("random-quote");
-
-    const output =
-        document.getElementById("quote-output");
-
-    if (!button || !output) {
-        return;
-    }
-
-    const quotes = [
-        "it works on my machine.",
-        "i should probably document this.",
-        "sudo make me a sandwich.",
-        "why is it using 8gb of ram?",
-        "it was the config file.",
-        "one more linux project.",
-        "i have absolutely no idea why this works.",
-        "have you tried turning it off and on again?"
-    ];
-
-    button.addEventListener("click", () => {
-        output.textContent =
-            quotes[
-                Math.floor(
-                    Math.random() * quotes.length
-                )
-            ];
-    });
-}
-
-setupVisitorCounter();
-setupRandomQuote();
+//setupVisitorCounter();
+//setupRandomQuote();
 connectLanyard();
 
 
