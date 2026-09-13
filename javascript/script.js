@@ -247,3 +247,39 @@ function setupRandomQuote() {
 setupVisitorCounter();
 setupRandomQuote();
 connectLanyard();
+
+
+// shared visitor counter
+(async function () {
+    const counter = document.getElementById("visitor-count");
+
+    if (!counter) return;
+
+    const cookieName = "ihatenosebleedz_visitor";
+    const hasVisited = document.cookie
+        .split("; ")
+        .some(cookie => cookie.startsWith(cookieName + "="));
+
+    const url =
+        "https://counterapi.com/api/ihatenosebleedz.github.io/view/home?unique=true";
+
+    try {
+        let response;
+
+        if (hasVisited) {
+            response = await fetch(url + "&readOnly=true");
+        } else {
+            document.cookie =
+                `${cookieName}=1; Max-Age=31536000; Path=/; SameSite=Lax`;
+
+            response = await fetch(url);
+        }
+
+        const data = await response.json();
+
+        counter.textContent =
+            String(data.value || 0).padStart(6, "0");
+    } catch (error) {
+        console.error("visitor counter:", error);
+    }
+})();
