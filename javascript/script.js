@@ -98,6 +98,32 @@ function updateDiscordStatus(user) {
         }
     }
 
+    /*
+     * Sidra music activity.
+     *
+     * Sidra reports:
+     * details = song title
+     * state   = "by artist"
+     *
+     * Last.fm track URLs can be constructed directly,
+     * so no API or backend is needed.
+     */
+    if (
+        activity.type === 2 &&
+        activity.name === "Sidra"
+    ) {
+        const track =
+            details.trim();
+
+        const artist =
+            state.replace(/^by\s+/i, "").trim();
+
+        if (track && artist) {
+            activityUrl =
+                `https://www.last.fm/music/${encodeURIComponent(artist)}/_/${encodeURIComponent(track)}`;
+        }
+    }
+
     let imageUrl = "";
 
     /*
