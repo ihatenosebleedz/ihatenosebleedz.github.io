@@ -66,12 +66,37 @@ function updateDiscordStatus(user) {
     const state =
         activity.state || "";
 
-    const youtubeSearchUrl =
-        activity.type === 3 && activity.name === "YouTube"
-            ? `https://www.youtube.com/results?search_query=${encodeURIComponent(
-                `"${details}" "${state}"`
-            )}`
-            : "";
+    let activityUrl = "";
+
+    /*
+     * YouTube activity links.
+     *
+     * When PreMiD reports that we're just browsing YouTube,
+     * send the user to YouTube itself.
+     *
+     * When an actual video is being watched, search for the
+     * video using its title and channel.
+     */
+    if (
+        activity.type === 3 &&
+        activity.name === "YouTube"
+    ) {
+        const browsing =
+            /browsing through/i.test(details);
+
+        if (browsing) {
+            activityUrl =
+                "https://www.youtube.com/";
+        } else if (details) {
+            const query =
+                state
+                    ? `"${details}" "${state}"`
+                    : `"${details}"`;
+
+            activityUrl =
+                `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+        }
+    }
 
     let imageUrl = "";
 
@@ -79,7 +104,8 @@ function updateDiscordStatus(user) {
      * Spotify exposes its album artwork separately.
      */
     if (user.listening_to_spotify && user.spotify) {
-        imageUrl = user.spotify.album_art_url || "";
+        imageUrl =
+            user.spotify.album_art_url || "";
     }
 
     /*
@@ -87,7 +113,8 @@ function updateDiscordStatus(user) {
      * assets.large_image.
      */
     if (!imageUrl && activity.assets?.large_image) {
-        const image = activity.assets.large_image;
+        const image =
+            activity.assets.large_image;
 
         if (image.startsWith("mp:")) {
             imageUrl =
@@ -102,13 +129,16 @@ function updateDiscordStatus(user) {
     }
 
     activityElement.innerHTML = `
-        <div class="activity-title">${typeName}</div>
+        <div class="activity-title">
+            ${typeName}
+        </div>
 
         <div class="activity-content">
+
             ${
-                youtubeSearchUrl
+                activityUrl
                     ? `<a
-                        href="${youtubeSearchUrl}"
+                        href="${activityUrl}"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="activity-link"
@@ -143,10 +173,16 @@ function updateDiscordStatus(user) {
                 }
             </div>
 
-            ${youtubeSearchUrl ? `</a>` : ""}
+            ${
+                activityUrl
+                    ? `</a>`
+                    : ""
+            }
+
         </div>
     `;
 }
+
 function connectLanyard() {
     console.log("connecting to Lanyard...");
 
@@ -209,97 +245,4 @@ function connectLanyard() {
     });
 }
 
-//function setupVisitorCounter() {
-//    const element =
-//        document.getElementById("visitor-count");
-//
-//    if (!element) {
-//        return;
-//    }
-//
-//    const key =
-//        "ihatenosebleedz-visitor-count";
-//
-//    const count =
-//        Number(localStorage.getItem(key) || 0) + 1;
-//
-//    localStorage.setItem(
-//        key,
-//        count
-//    );
-//
-//    element.textContent =
-//        String(count).padStart(6, "0");
-//}
-
-//function setupRandomQuote() {
-//    const button =
-//        document.getElementById("random-quote");
-//
-//    const output =
-//        document.getElementById("quote-output");
-//
-//    if (!button || !output) {
-//        return;
-//    }
-//
-//    const quotes = [
-//        "it works on my machine.",
-//        "i should probably document this.",
-//        "sudo make me a sandwich.",
-//        "why is it using 8gb of ram?",
-//        "it was the config file.",
-//        "one more linux project.",
-//        "i have absolutely no idea why this works.",
-//        "have you tried turning it off and on again?"
-//    ];
-//
-//    button.addEventListener("click", () => {
-//        output.textContent =
-//            quotes[
-//                Math.floor(
-//                    Math.random() * quotes.length
-//                )
-//            ];
-//    });
-//}
-
-//setupVisitorCounter();
-//setupRandomQuote();
 connectLanyard();
-
-
-// shared visitor counter
-(async function () {
-    const counter = document.getElementById("visitor-count");
-
-    if (!counter) return;
-
-    const cookieName = "ihatenosebleedz_visitor";
-    const hasVisited = document.cookie
-        .split("; ")
-        .some(cookie => cookie.startsWith(cookieName + "="));
-
-    const url =
-        "https://counterapi.com/api/ihatenosebleedz.github.io/view/home?unique=true";
-
-    try {
-        let response;
-
-        if (hasVisited) {
-            response = await fetch(url + "&readOnly=true");
-        } else {
-            document.cookie =
-                `${cookieName}=1; Max-Age=31536000; Path=/; SameSite=Lax`;
-
-            response = await fetch(url);
-        }
-
-        const data = await response.json();
-
-        counter.textContent =
-            String(data.value || 0).padStart(6, "0");
-    } catch (error) {
-        console.error("visitor counter:", error);
-    }
-})();
